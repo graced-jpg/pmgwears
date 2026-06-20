@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>MAEVE Admin — Image Manager</title>
+<title>PMG WEARS Admin — Image Manager</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="style.css"/>
 <style>
@@ -308,7 +308,7 @@
 
 <!-- LOGIN SCREEN -->
 <div class="admin-login" id="loginScreen">
-  <h1>MAEVE · Admin</h1>
+  <h1>PMG WEARS · Admin</h1>
   <div class="login-box">
     <p style="font-family:'DM Sans',sans-serif;font-size:0.85rem;color:#888;margin:0;">Enter your admin password to continue.</p>
     <input type="password" id="passwordInput" placeholder="Password" onkeydown="if(event.key==='Enter') handleLogin()"/>
@@ -321,7 +321,7 @@
 <!-- ADMIN PANEL -->
 <div class="admin-panel" id="adminPanel">
   <div class="admin-header">
-    <div class="logo">MAEVE <span style="font-family:'DM Sans',sans-serif;font-size:0.8rem;color:#888;letter-spacing:0.1em;">Admin</span></div>
+    <div class="logo">PMG WEARS <span style="font-family:'DM Sans',sans-serif;font-size:0.8rem;color:#888;letter-spacing:0.1em;">Admin</span></div>
     <button class="logout-btn" onclick="logout()">Log Out</button>
   </div>
 
@@ -375,12 +375,12 @@
 
 <script>
 // ── Auth ──────────────────────────────────────────────────────────────────────
-const ADMIN_PASSWORD = 'maeve2025'; // Change this to your real password
+const ADMIN_PASSWORD = 'PMGWEARS2026'; // Change this to your real password
 
 function handleLogin() {
   const pw = document.getElementById('passwordInput').value;
   if (pw === ADMIN_PASSWORD) {
-    sessionStorage.setItem('maeve_admin', '1');
+    sessionStorage.setItem('PMG WEARS_admin', '1');
     document.getElementById('loginScreen').style.display = 'none';
     document.getElementById('adminPanel').classList.add('visible');
     loadAll();
@@ -391,12 +391,12 @@ function handleLogin() {
 }
 
 function logout() {
-  sessionStorage.removeItem('maeve_admin');
+  sessionStorage.removeItem('PMG WEARS_admin');
   location.reload();
 }
 
 // Check if already logged in
-if (sessionStorage.getItem('maeve_admin')) {
+if (sessionStorage.getItem('PMG WEARS_admin')) {
   document.getElementById('loginScreen').style.display = 'none';
   document.getElementById('adminPanel').classList.add('visible');
   loadAll();
@@ -404,10 +404,10 @@ if (sessionStorage.getItem('maeve_admin')) {
 
 // ── Storage helpers ────────────────────────────────────────────────────────────
 function getImages() {
-  return JSON.parse(localStorage.getItem('maeve_images') || '[]');
+  return JSON.parse(localStorage.getItem('PMG WEARS_images') || '[]');
 }
 function saveImages(arr) {
-  localStorage.setItem('maeve_images', JSON.stringify(arr));
+  localStorage.setItem('PMG WEARS_images', JSON.stringify(arr));
 }
 
 // ── Tabs ──────────────────────────────────────────────────────────────────────
