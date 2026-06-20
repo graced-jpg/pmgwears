@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>MAEVE Admin — Image Manager</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="style.css"/>
+<style>
+  /* Admin-specific styles */
+  body { background: #F5F2ED; }
+
+  .admin-login {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 2rem;
+  }
+  .admin-login h1 { font-family: 'Cormorant Garamond', serif; font-size: 2rem; color: #1C1C1C; }
+  .login-box {
+    background: #fff;
+    padding: 2.5rem;
+    border-radius: 4px;
+    width: 100%;
+    max-width: 380px;
+    box-shadow: 0 4px 30px rgba(0,0,0,0.06);
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  .login-box input {
+    width: 100%;
+    padding: 0.85rem 1rem;
+    border: 1px solid #E0D8CF;
+    border-radius: 3px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    color: #1C1C1C;
+    background: #FAF7F2;
+    box-sizing: border-box;
+  }
+  .login-box input:focus { outline: none; border-color: #C4A99A; }
+  .login-box button {
+    background: #1C1C1C;
+    color: #FAF7F2;
+    border: none;
+    padding: 0.9rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    border-radius: 3px;
+    text-transform: uppercase;
+  }
+  .login-error { color: #C0392B; font-size: 0.82rem; font-family: 'DM Sans', sans-serif; text-align: center; }
+
+  .admin-panel { display: none; padding: 2rem; max-width: 1100px; margin: 0 auto; }
+  .admin-panel.visible { display: block; }
+
+  .admin-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.5rem 0;
+    border-bottom: 1px solid #E0D8CF;
+    margin-bottom: 2.5rem;
+  }
+  .admin-header .logo { font-family: 'Cormorant Garamond', serif; font-size: 1.6rem; letter-spacing: 0.15em; }
+  .admin-header .logout-btn {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.8rem;
+    color: #666;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    background: none;
+    border: 1px solid #ddd;
+    padding: 0.5rem 1rem;
+    border-radius: 3px;
+  }
+
+  .admin-tabs {
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid #E0D8CF;
+    margin-bottom: 2rem;
+  }
+  .admin-tab {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    padding: 0.75rem 1.5rem;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    color: #888;
+    transition: all 0.2s;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .admin-tab.active { color: #1C1C1C; border-bottom-color: #C4A99A; }
+
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* Upload Zone */
+  .upload-zone {
+    border: 2px dashed #C4A99A;
+    border-radius: 6px;
+    padding: 3rem;
+    text-align: center;
+    background: #fff;
+    cursor: pointer;
+    transition: background 0.2s;
+    margin-bottom: 2rem;
+  }
+  .upload-zone:hover { background: #FAF7F2; }
+  .upload-zone p { font-family: 'DM Sans', sans-serif; color: #888; font-size: 0.9rem; }
+  .upload-zone .upload-icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
+  .upload-zone input[type=file] { display: none; }
+
+  .upload-meta {
+    background: #fff;
+    padding: 1.5rem;
+    border-radius: 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    border: 1px solid #E0D8CF;
+  }
+  .upload-meta input, .upload-meta select {
+    padding: 0.75rem 1rem;
+    border: 1px solid #E0D8CF;
+    border-radius: 3px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    background: #FAF7F2;
+  }
+  .upload-meta input:focus, .upload-meta select:focus { outline: none; border-color: #C4A99A; }
+
+  .btn-submit-upload {
+    background: #C4A99A;
+    color: #fff;
+    border: none;
+    padding: 0.9rem 2rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    border-radius: 3px;
+    text-transform: uppercase;
+  }
+
+  .preview-strip {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.5rem;
+  }
+  .preview-thumb {
+    width: 90px;
+    height: 90px;
+    object-fit: cover;
+    border-radius: 4px;
+    border: 2px solid #E0D8CF;
+  }
+
+  /* Approval Queue */
+  .queue-empty {
+    text-align: center;
+    padding: 3rem;
+    color: #aaa;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .queue-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 1.5rem;
+  }
+  .queue-card {
+    background: #fff;
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid #E0D8CF;
+    position: relative;
+  }
+  .queue-card img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    display: block;
+  }
+  .queue-card-info {
+    padding: 1rem;
+  }
+  .queue-card-info h4 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1rem;
+    margin: 0 0 0.25rem;
+  }
+  .queue-card-info p {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.75rem;
+    color: #888;
+    margin: 0 0 0.75rem;
+  }
+  .queue-badge {
+    position: absolute;
+    top: 0.75rem;
+    left: 0.75rem;
+    padding: 0.25rem 0.6rem;
+    border-radius: 2px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-weight: 500;
+  }
+  .badge-pending { background: #FFF3CD; color: #856404; }
+  .badge-approved { background: #D1E7DD; color: #0A5C36; }
+  .badge-rejected { background: #F8D7DA; color: #721C24; }
+
+  .queue-actions { display: flex; gap: 0.5rem; }
+  .btn-approve, .btn-reject, .btn-delete {
+    flex: 1;
+    padding: 0.5rem;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .btn-approve { background: #D1E7DD; color: #0A5C36; }
+  .btn-approve:hover { background: #badbcc; }
+  .btn-reject { background: #F8D7DA; color: #721C24; }
+  .btn-reject:hover { background: #f1aeb5; }
+  .btn-delete { background: #f0f0f0; color: #555; }
+  .btn-delete:hover { background: #e0e0e0; }
+
+  /* Live images tab */
+  .live-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+  }
+  .live-card {
+    background: #fff;
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid #E0D8CF;
+  }
+  .live-card img { width: 100%; height: 160px; object-fit: cover; display: block; }
+  .live-card-info { padding: 0.75rem; display: flex; align-items: center; justify-content: space-between; }
+  .live-card-info span { font-family: 'DM Sans', sans-serif; font-size: 0.8rem; color: #555; }
+  .btn-remove-live {
+    background: none;
+    border: 1px solid #f1aeb5;
+    color: #721C24;
+    padding: 0.3rem 0.6rem;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 0.72rem;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .stats-bar {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+  }
+  .stat-chip {
+    background: #fff;
+    border: 1px solid #E0D8CF;
+    border-radius: 4px;
+    padding: 0.75rem 1.25rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.8rem;
+    color: #555;
+  }
+  .stat-chip strong { display: block; font-size: 1.4rem; color: #1C1C1C; font-weight: 500; }
+
+  .toast {
+    position: fixed;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%) translateY(4rem);
+    background: #1C1C1C;
+    color: #FAF7F2;
+    padding: 0.75rem 1.5rem;
+    border-radius: 4px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    opacity: 0;
+    transition: all 0.3s;
+    z-index: 9999;
+    white-space: nowrap;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div class="admin-login" id="loginScreen">
+  <h1>MAEVE · Admin</h1>
+  <div class="login-box">
+    <p style="font-family:'DM Sans',sans-serif;font-size:0.85rem;color:#888;margin:0;">Enter your admin password to continue.</p>
+    <input type="password" id="passwordInput" placeholder="Password" onkeydown="if(event.key==='Enter') handleLogin()"/>
+    <button onclick="handleLogin()">Log In</button>
+    <p class="login-error" id="loginError" style="display:none">Incorrect password. Try again.</p>
+  </div>
+  <a href="index.html" style="font-family:'DM Sans',sans-serif;font-size:0.8rem;color:#aaa;text-decoration:none;">← Back to site</a>
+</div>
+
+<!-- ADMIN PANEL -->
+<div class="admin-panel" id="adminPanel">
+  <div class="admin-header">
+    <div class="logo">MAEVE <span style="font-family:'DM Sans',sans-serif;font-size:0.8rem;color:#888;letter-spacing:0.1em;">Admin</span></div>
+    <button class="logout-btn" onclick="logout()">Log Out</button>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-bar" id="statsBar"></div>
+
+  <!-- TABS -->
+  <div class="admin-tabs">
+    <div class="admin-tab active" onclick="switchTab('upload', this)">Upload Images</div>
+    <div class="admin-tab" onclick="switchTab('queue', this)">Pending Approval</div>
+    <div class="admin-tab" onclick="switchTab('live', this)">Live on Site</div>
+  </div>
+
+  <!-- UPLOAD TAB -->
+  <div class="tab-content active" id="tab-upload">
+    <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()" ondrop="handleDrop(event)" ondragover="event.preventDefault()">
+      <div class="upload-icon">🖼️</div>
+      <p><strong>Click to upload</strong> or drag and drop images here</p>
+      <p style="font-size:0.78rem">JPG, PNG, WEBP — max 5MB each</p>
+      <input type="file" id="fileInput" multiple accept="image/*" onchange="handleFileSelect(event)"/>
+    </div>
+
+    <div class="preview-strip" id="previewStrip"></div>
+
+    <div class="upload-meta" id="uploadMeta" style="display:none">
+      <input type="text" id="imgTitle" placeholder="Image title (e.g. Ivory Linen Dress)" />
+      <input type="text" id="imgPrice" placeholder="Price (e.g. ₦35,000)" />
+      <select id="imgSection">
+        <option value="">— Assign to section —</option>
+        <option value="collections">Collections Grid</option>
+        <option value="lookbook">Lookbook / Gallery</option>
+      </select>
+      <button class="btn-submit-upload" onclick="submitForApproval()">Submit for Approval →</button>
+    </div>
+  </div>
+
+  <!-- QUEUE TAB -->
+  <div class="tab-content" id="tab-queue">
+    <div class="queue-grid" id="queueGrid"></div>
+    <div class="queue-empty" id="queueEmpty" style="display:none">✓ No pending images — you're all caught up.</div>
+  </div>
+
+  <!-- LIVE TAB -->
+  <div class="tab-content" id="tab-live">
+    <div class="live-grid" id="liveGrid"></div>
+    <div class="queue-empty" id="liveEmpty" style="display:none">No approved images live yet.</div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── Auth ──────────────────────────────────────────────────────────────────────
+const ADMIN_PASSWORD = 'maeve2025'; // Change this to your real password
+
+function handleLogin() {
+  const pw = document.getElementById('passwordInput').value;
+  if (pw === ADMIN_PASSWORD) {
+    sessionStorage.setItem('maeve_admin', '1');
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('adminPanel').classList.add('visible');
+    loadAll();
+  } else {
+    document.getElementById('loginError').style.display = 'block';
+    document.getElementById('passwordInput').value = '';
+  }
+}
+
+function logout() {
+  sessionStorage.removeItem('maeve_admin');
+  location.reload();
+}
+
+// Check if already logged in
+if (sessionStorage.getItem('maeve_admin')) {
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('adminPanel').classList.add('visible');
+  loadAll();
+}
+
+// ── Storage helpers ────────────────────────────────────────────────────────────
+function getImages() {
+  return JSON.parse(localStorage.getItem('maeve_images') || '[]');
+}
+function saveImages(arr) {
+  localStorage.setItem('maeve_images', JSON.stringify(arr));
+}
+
+// ── Tabs ──────────────────────────────────────────────────────────────────────
+function switchTab(name, el) {
+  document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('tab-' + name).classList.add('active');
+  if (name === 'queue') renderQueue();
+  if (name === 'live') renderLive();
+}
+
+// ── File Upload ────────────────────────────────────────────────────────────────
+let pendingFiles = [];
+
+function handleFileSelect(e) {
+  pendingFiles = Array.from(e.target.files);
+  showPreviews();
+}
+
+function handleDrop(e) {
+  e.preventDefault();
+  pendingFiles = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
+  showPreviews();
+}
+
+function showPreviews() {
+  const strip = document.getElementById('previewStrip');
+  strip.innerHTML = '';
+  pendingFiles.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const img = document.createElement('img');
+      img.src = ev.target.result;
+      img.className = 'preview-thumb';
+      strip.appendChild(img);
+    };
+    reader.readAsDataURL(file);
+  });
+  document.getElementById('uploadMeta').style.display = pendingFiles.length ? 'flex' : 'none';
+}
+
+function submitForApproval() {
+  if (!pendingFiles.length) return;
+  const title = document.getElementById('imgTitle').value.trim() || 'Untitled';
+  const price = document.getElementById('imgPrice').value.trim() || '';
+  const section = document.getElementById('imgSection').value || 'lookbook';
+
+  let processed = 0;
+  const images = getImages();
+
+  pendingFiles.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = ev => {
+      images.push({
+        id: Date.now() + Math.random(),
+        src: ev.target.result,
+        title,
+        price,
+        section,
+        status: 'pending',
+        uploadedAt: new Date().toLocaleString()
+      });
+      processed++;
+      if (processed === pendingFiles.length) {
+        saveImages(images);
+        pendingFiles = [];
+        document.getElementById('previewStrip').innerHTML = '';
+        document.getElementById('uploadMeta').style.display = 'none';
+        document.getElementById('imgTitle').value = '';
+        document.getElementById('imgPrice').value = '';
+        document.getElementById('imgSection').value = '';
+        document.getElementById('fileInput').value = '';
+        updateStats();
+        showToast('✓ Submitted for approval');
+      }
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+// ── Queue ──────────────────────────────────────────────────────────────────────
+function renderQueue() {
+  const images = getImages().filter(i => i.status === 'pending');
+  const grid = document.getElementById('queueGrid');
+  const empty = document.getElementById('queueEmpty');
+  grid.innerHTML = '';
+
+  if (!images.length) {
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+
+  images.forEach(img => {
+    const card = document.createElement('div');
+    card.className = 'queue-card';
+    card.innerHTML = `
+      <span class="queue-badge badge-pending">Pending</span>
+      <img src="${img.src}" alt="${img.title}"/>
+      <div class="queue-card-info">
+        <h4>${img.title}</h4>
+        <p>${img.price ? img.price + ' · ' : ''}${img.section} · ${img.uploadedAt}</p>
+        <div class="queue-actions">
+          <button class="btn-approve" onclick="approveImage('${img.id}')">Approve</button>
+          <button class="btn-reject" onclick="rejectImage('${img.id}')">Reject</button>
+          <button class="btn-delete" onclick="deleteImage('${img.id}')">Delete</button>
+        </div>
+      </div>`;
+    grid.appendChild(card);
+  });
+}
+
+function approveImage(id) {
+  const images = getImages().map(i => i.id == id ? { ...i, status: 'approved' } : i);
+  saveImages(images);
+  renderQueue();
+  updateStats();
+  showToast('✓ Image approved — now live on site');
+}
+
+function rejectImage(id) {
+  const images = getImages().map(i => i.id == id ? { ...i, status: 'rejected' } : i);
+  saveImages(images);
+  renderQueue();
+  updateStats();
+  showToast('Image rejected');
+}
+
+function deleteImage(id) {
+  saveImages(getImages().filter(i => i.id != id));
+  renderQueue();
+  renderLive();
+  updateStats();
+  showToast('Image deleted');
+}
+
+// ── Live ──────────────────────────────────────────────────────────────────────
+function renderLive() {
+  const images = getImages().filter(i => i.status === 'approved');
+  const grid = document.getElementById('liveGrid');
+  const empty = document.getElementById('liveEmpty');
+  grid.innerHTML = '';
+
+  if (!images.length) {
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+
+  images.forEach(img => {
+    const card = document.createElement('div');
+    card.className = 'live-card';
+    card.innerHTML = `
+      <img src="${img.src}" alt="${img.title}"/>
+      <div class="live-card-info">
+        <span>${img.title}${img.price ? ' — ' + img.price : ''}</span>
+        <button class="btn-remove-live" onclick="deleteImage('${img.id}')">Remove</button>
+      </div>`;
+    grid.appendChild(card);
+  });
+}
+
+// ── Stats ──────────────────────────────────────────────────────────────────────
+function updateStats() {
+  const all = getImages();
+  const pending = all.filter(i => i.status === 'pending').length;
+  const approved = all.filter(i => i.status === 'approved').length;
+  const rejected = all.filter(i => i.status === 'rejected').length;
+  document.getElementById('statsBar').innerHTML = `
+    <div class="stat-chip"><strong>${all.length}</strong>Total Uploads</div>
+    <div class="stat-chip"><strong>${approved}</strong>Live on Site</div>
+    <div class="stat-chip"><strong>${pending}</strong>Awaiting Approval</div>
+    <div class="stat-chip"><strong>${rejected}</strong>Rejected</div>
+  `;
+}
+
+// ── Toast ──────────────────────────────────────────────────────────────────────
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+function loadAll() {
+  updateStats();
+  renderQueue();
+}
+</script>
+</body>
+</html>
