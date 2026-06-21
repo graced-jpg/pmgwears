@@ -73,7 +73,7 @@ a { text-decoration: none; color: inherit; }
   display: flex;
   align-items: center;
   justify-content: center;
-  background-image: url('https://images.unsplash.com/photo-1567401893414-76b7b1e5a7a5?w=1600&q=85');
+  background-image: url('https://images.unsplash.com/photo-1509631179647-0177331693ae?w=1600&q=85');
   background-size: cover;
   background-position: center 30%;
 }
@@ -332,24 +332,26 @@ section { padding: 6rem 3rem; }
   bottom: 0;
   left: 0;
   right: 0;
-  padding: 1.5rem 1rem 1rem;
-  background: linear-gradient(transparent, rgba(28,28,28,0.7));
+  padding: 1.5rem 1rem 0.85rem;
+  background: linear-gradient(transparent, rgba(28,28,28,0.55));
   color: #FAF7F2;
-  opacity: 0;
-  transition: opacity 0.35s;
+  opacity: 1; /* always visible */
 }
-.masonry-item:hover .masonry-caption { opacity: 1; }
 .masonry-caption h4 {
   font-family: var(--serif);
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: 400;
+  letter-spacing: 0.02em;
 }
 .masonry-caption p {
   font-family: var(--sans);
   font-size: 0.75rem;
+  font-weight: 300;
   opacity: 0.8;
   margin-top: 0.2rem;
+  letter-spacing: 0.04em;
 }
+
 
 /* ── Order CTA ────────────────────────────────────────────────── */
 #order {
@@ -372,6 +374,39 @@ section { padding: 6rem 3rem; }
   line-height: 1.8;
   font-size: 0.95rem;
   margin-bottom: 2.5rem;
+}
+
+
+/* ── Screenshot note ──────────────────────────────────────────── */
+.screenshot-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  background: rgba(250,247,242,0.07);
+  border: 1px solid rgba(250,247,242,0.15);
+  border-radius: 6px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 2rem;
+  text-align: left;
+  max-width: 480px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.screenshot-icon {
+  font-size: 1.4rem;
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+}
+.screenshot-note p {
+  font-family: var(--sans);
+  font-size: 0.82rem;
+  color: rgba(250,247,242,0.7);
+  line-height: 1.7;
+  margin: 0 0 0 0 !important;
+}
+.screenshot-note p strong {
+  color: var(--ivory);
+  font-weight: 500;
 }
 
 /* ── Footer ───────────────────────────────────────────────────── */
